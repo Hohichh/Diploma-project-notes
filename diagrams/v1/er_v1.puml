@@ -1,0 +1,64 @@
+@startuml
+' Настройки стиля для ГОСТ (черно-белый, без теней, строгие линии)
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam linetype ortho
+
+' Определение сущностей
+entity "Пользователь\n(users)" as users {
+  * id : UUID <<PK>>
+  --
+  * email : VARCHAR
+  * password_hash : VARCHAR
+}
+
+entity "Учебная задача\n(tasks)" as tasks {
+  * id : UUID <<PK>>
+  --
+  * user_id : UUID <<FK>>
+  * title : VARCHAR
+  description : TEXT
+  * deadline : TIMESTAMP
+  * status : VARCHAR
+  created_at : TIMESTAMP
+}
+
+entity "Подзадача / Спринт\n(subtasks)" as subtasks {
+  * id : UUID <<PK>>
+  --
+  * task_id : UUID <<FK>>
+  * title : VARCHAR
+  * estimated_minutes : INT
+  cognitive_load : VARCHAR
+  dependency_id : UUID <<FK>>
+  is_completed : BOOLEAN
+}
+
+entity "Черновик расписания\n(schedule_drafts)" as drafts {
+  * id : UUID <<PK>>
+  --
+  * user_id : UUID <<FK>>
+  * status : VARCHAR
+  created_at : TIMESTAMP
+}
+
+entity "Временной слот\n(timeslots)" as timeslots {
+  * id : UUID <<PK>>
+  --
+  * draft_id : UUID <<FK>>
+  * subtask_id : UUID <<FK>>
+  * start_time : TIMESTAMP
+  * end_time : TIMESTAMP
+  is_committed : BOOLEAN
+}
+
+' Описание связей (Crow's Foot)
+users ||--o{ tasks : "Создает"
+users ||--o{ drafts : "Инициирует"
+tasks ||--o{ subtasks : "Декомпозируется на"
+subtasks |o--o| subtasks : "Зависит от (dependency_id)"
+drafts ||--o{ timeslots : "Содержит"
+subtasks ||--o{ timeslots : "Назначается на"
+
+@enduml

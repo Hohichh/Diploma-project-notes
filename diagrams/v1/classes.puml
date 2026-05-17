@@ -1,0 +1,83 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' Пакет Контроллеров
+package "Слой контроллеров (API Layer)" {
+    class ScheduleController <<REST Controller>> {
+        + generateDraft(\n  request: GenerateRequestDTO\n): DraftResponseDTO
+        + commitDraft(draftId: UUID): ResponseEntity
+        + rejectDraft(draftId: UUID): ResponseEntity
+    }
+}
+
+' Пакет Бизнес-логики
+package "Слой бизнес-логики (Service Layer)" {
+    class ScheduleService <<Service>> {
+        - agentService: AgentService
+        - draftRepository: ScheduleDraftRepository
+        - timeslotRepository: TimeslotRepository
+        - binPackingSolver: ScheduleAlgorithm
+        + processGenerationRequest(\n  prompt: String,\n  userId: UUID\n): ScheduleDraft
+        + commitSchedule(draftId: UUID): void
+    }
+
+    class AgentService <<Service>> {
+        - llmClient: LLMClient
+        + analyzeAndDecompose(\n  prompt: String,\n  context: Context\n): DecomposedTaskDTO
+    }
+
+    class ScheduleAlgorithm <<Component>> {
+        + findOptimalSlots(\n  tasks: List<Subtask>,\n  calendar: CalendarState\n): List<Timeslot>
+    }
+}
+
+' Пакет Доступа к данным
+package "Слой доступа к данным (Data Layer)" {
+    interface ScheduleDraftRepository <<Repository>> {
+        + findById(id: UUID): Optional<ScheduleDraft>
+        + save(draft: ScheduleDraft): ScheduleDraft
+        + updateStatus(\n  id: UUID,\n  status: String\n): void
+    }
+
+    interface TimeslotRepository <<Repository>> {
+        + findOverlapping(\n  userId: UUID,\n  start: Time,\n  end: Time\n): List<Timeslot>
+        + saveAll(slots: List<Timeslot>): void
+    }
+}
+
+' Пакет Доменной модели
+package "Доменная модель (Domain Layer)" {
+    class ScheduleDraft <<Entity>> {
+        - id: UUID
+        - userId: UUID
+        - status: String
+        + approve(): void
+        + reject(): void
+    }
+
+    class Timeslot <<Entity>> {
+        - id: UUID
+        - draftId: UUID
+        - startTime: Timestamp
+        - endTime: Timestamp
+        - isCommitted: Boolean
+    }
+}
+
+' Связи между слоями
+ScheduleController ..> ScheduleService : "Вызывает"
+
+ScheduleService --> AgentService : "Делегирует декомпозицию"
+ScheduleService --> ScheduleAlgorithm : "Запускает бин-пакинг"
+ScheduleService --> ScheduleDraftRepository : "Сохраняет состояние"
+ScheduleService --> TimeslotRepository : "Проверяет коллизии"
+
+ScheduleDraftRepository ..> ScheduleDraft : "Возвращает"
+TimeslotRepository ..> Timeslot : "Возвращает"
+
+ScheduleAlgorithm ..> Timeslot : "Генерирует"
+@enduml

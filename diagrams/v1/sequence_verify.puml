@@ -1,0 +1,27 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+autonumber "<b>[0]</b>"
+
+actor "Пользователь" as User
+participant "Интерфейс" as UI
+participant "Маршрутизатор" as Backend
+database "База данных" as DB
+
+User -> UI : Утверждение плана
+activate UI
+UI -> Backend : Запрос на применение Draft
+activate Backend
+
+Backend -> DB : Сохранение задач и связей
+activate DB
+DB --> Backend : Подтверждение транзакции
+deactivate DB
+
+Backend --> UI : Успешный статус
+deactivate Backend
+UI --> User : Обновление расписания
+deactivate UI
+@enduml

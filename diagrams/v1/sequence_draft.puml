@@ -1,0 +1,34 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+
+autonumber "<b>[0]</b>"
+
+actor "Пользователь" as User
+participant "Интерфейс" as UI
+participant "Маршрутизатор" as Backend
+participant "Агентный модуль" as Agent
+database "База данных" as DB
+
+User -> UI : Текстовый запрос
+activate UI
+UI -> Backend : Намерение и токен
+activate Backend
+
+Backend -> DB : Запрос занятых слотов
+DB --> Backend : Состояние расписания
+
+note over Backend : Обогащение контекстом
+
+Backend -> Agent : Обогащенный запрос
+activate Agent
+note over Agent : Декомпозиция и поиск слотов
+Agent --> Backend : Объект Draft
+deactivate Agent
+
+Backend --> UI : Возврат "черновика"
+deactivate Backend
+UI --> User : Отрисовка карточек (Ожидание)
+deactivate UI
+@enduml
