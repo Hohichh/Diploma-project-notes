@@ -11,6 +11,7 @@ skinparam backgroundColor transparent
 left to right direction
 
 interface AgentService <<Service>>
+interface DocumentService <<Service>>
 interface DraftService <<Service>>
 
 enum SubtaskStatus {
@@ -72,6 +73,7 @@ interface VectorStore <<Spring AI>> {
 DraftService ..> SubtaskRepository
 DraftService ..> TimeslotRepository
 AgentService ..> VectorStore
+DocumentService ..> VectorStore
 
 SubtaskRepository --> Subtask
 TimeslotRepository --> Timeslot

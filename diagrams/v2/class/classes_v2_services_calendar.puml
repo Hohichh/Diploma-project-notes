@@ -20,7 +20,6 @@ interface AgentService <<Service>>
 interface TaskRepository <<Repository>>
 interface SubtaskRepository <<Repository>>
 interface TimeslotRepository <<Repository>>
-interface VectorStore <<Spring AI>>
 
 
 class TaskRequest <<DTO>>
@@ -52,7 +51,6 @@ AgentService ..> CalendarService
 CalendarService .up.> TaskRepository
 CalendarService .up.> SubtaskRepository
 CalendarService .up.> TimeslotRepository
-CalendarService .up.> VectorStore 
 
 
 

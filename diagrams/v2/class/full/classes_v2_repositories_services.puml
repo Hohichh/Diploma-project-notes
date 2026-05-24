@@ -160,6 +160,12 @@ interface AgentService <<Service>> {
     + processRequest(message: String, userId: UUID, taskId: UUID?): DraftResponse
 }
 
+interface DocumentService <<Service>> {
+    + uploadDocument(userId: UUID, filename: String, content: Binary): Document
+    + getDocuments(userId: UUID): List<Document>
+    + deleteDocument(userId: UUID, documentId: String): void
+}
+
 interface DraftService <<Service>> {
     + createDraftBatch(userId: UUID, drafts: List<SubtaskDraft>): DraftResponse
     + proposeDraftModification(userId: UUID, subtaskId: UUID, newTimeslot: Timeslot): SubtaskResponse
@@ -179,13 +185,14 @@ AuthService ..> AuthMethodRepository
 CalendarService ..> TaskRepository
 CalendarService ..> SubtaskRepository
 CalendarService ..> TimeslotRepository
-CalendarService ..> VectorStore
 CalendarService ..> SubtaskStatus
 
 AgentService ..> CalendarService
 AgentService ..> DraftService
 AgentService ..> SlotAllocationStrategy
 AgentService ..> VectorStore
+DocumentService ..> VectorStore
+DocumentService ..> Document
 
 DraftService ..> SubtaskRepository
 DraftService ..> TimeslotRepository

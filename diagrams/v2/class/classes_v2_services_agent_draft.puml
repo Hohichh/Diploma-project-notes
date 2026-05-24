@@ -18,15 +18,24 @@ interface TimeslotRepository <<Repository>>
 class AgentRequest <<DTO>>
 class DraftResponse <<DTO>>
 class SubtaskResponse <<DTO>>
+class DocumentUploadRequest <<DTO>>
+class DocumentResponse <<DTO>>
 
 class Subtask <<Entity>>
 class Timeslot <<Entity>>
+class Document <<Spring AI>>
 class SubtaskDraft <<ValueObject>>
 class ProposedTimeslot <<ValueObject>>
 class AllocationConstraints <<ValueObject>>
 
 interface AgentService <<Service>> {
     + processRequest(message: String,\n userId: UUID,\n taskId: UUID?): DraftResponse
+}
+
+interface DocumentService <<Service>> {
+    + uploadDocument(userId: UUID, req: DocumentUploadRequest): DocumentResponse
+    + getDocuments(userId: UUID): List<DocumentResponse>
+    + deleteDocument(userId: UUID, documentId: String): void
 }
 
 interface DraftService <<Service>> {
@@ -54,6 +63,10 @@ AgentService .up.> CalendarService
 AgentService .right.> DraftService
 AgentService .down.> SlotAllocationStrategy
 AgentService .left.> VectorStore 
+DocumentService .left.> VectorStore
+DocumentService ..> DocumentUploadRequest
+DocumentService ..> DocumentResponse
+VectorStore --> Document
 AgentService .up.> AgentRequest
 AgentService ..> DraftResponse
 

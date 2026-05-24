@@ -1,0 +1,50 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam classBackgroundColor transparent
+skinparam classBorderColor black
+skinparam classAttributeBackgroundColor transparent
+skinparam backgroundColor transparent
+left to right direction
+
+class Document <<Spring AI>> {
+    + id: String
+    + content: String
+    + metadata: Map<String, Object>
+    + embedding: float[]
+}
+
+class DocumentUploadRequest <<DTO>> {
+    + filename: String
+    + contentType: String
+    + content: Binary
+}
+
+class DocumentResponse <<DTO>> {
+    + id: String
+    + filename: String
+    + contentType: String
+    + created_at: Timestamp
+}
+
+interface VectorStore <<Spring AI>> {
+    + add(documents: List<Document>): void
+    + similaritySearch(query: String, topK: Int): List<Document>
+    + delete(ids: List<String>): void
+}
+
+interface DocumentService <<Service>> {
+    + uploadDocument(userId: UUID, req: DocumentUploadRequest): DocumentResponse
+    + getDocuments(userId: UUID): List<DocumentResponse>
+    + deleteDocument(userId: UUID, documentId: String): void
+}
+
+DocumentService ..> DocumentUploadRequest
+DocumentService ..> DocumentResponse
+DocumentService ..> VectorStore
+VectorStore --> Document
+
+@enduml

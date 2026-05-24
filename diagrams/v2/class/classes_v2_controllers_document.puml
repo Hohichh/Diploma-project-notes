@@ -1,0 +1,38 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam classBackgroundColor transparent
+skinparam classBorderColor black
+skinparam classAttributeBackgroundColor transparent
+skinparam backgroundColor transparent
+left to right direction
+
+class DocumentUploadRequest <<DTO>> {
+    + filename: String
+    + contentType: String
+    + content: Binary
+}
+
+class DocumentResponse <<DTO>> {
+    + id: String
+    + filename: String
+    + contentType: String
+    + created_at: Timestamp
+}
+
+interface DocumentService <<Service>>
+
+interface DocumentController <<REST>> {
+    + upload(req: DocumentUploadRequest): DocumentResponse
+    + getDocuments(): List<DocumentResponse>
+    + deleteDocument(id: String): void
+}
+
+DocumentController ..> DocumentUploadRequest
+DocumentController ..> DocumentResponse
+DocumentController ..> DocumentService
+
+@enduml

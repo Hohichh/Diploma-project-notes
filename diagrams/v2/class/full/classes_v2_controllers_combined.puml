@@ -119,11 +119,25 @@ class DraftResponse <<DTO>> {
     + has_modifications: Boolean
 }
 
+class DocumentUploadRequest <<DTO>> {
+    + filename: String
+    + contentType: String
+    + content: Binary
+}
+
+class DocumentResponse <<DTO>> {
+    + id: String
+    + filename: String
+    + contentType: String
+    + created_at: Timestamp
+}
+
 interface UserService <<Service>>
 interface AuthService <<Service>>
 interface CalendarService <<Service>>
 interface AgentService <<Service>>
 interface DraftService <<Service>>
+interface DocumentService <<Service>>
 
 interface UserController <<REST>> {
     + createUser(req: UserRequest): UserResponse
@@ -162,6 +176,12 @@ interface AgentController <<REST>> {
     + getDraft(): DraftResponse
 }
 
+interface DocumentController <<REST>> {
+    + upload(req: DocumentUploadRequest): DocumentResponse
+    + getDocuments(): List<DocumentResponse>
+    + deleteDocument(id: String): void
+}
+
 UserController ..> UserRequest
 UserController ..> UserResponse
 UserController ..> UserService
@@ -184,6 +204,10 @@ AgentController ..> DraftResponse
 AgentController ..> SubtaskResponse
 AgentController ..> AgentService
 AgentController ..> DraftService
+
+DocumentController ..> DocumentUploadRequest
+DocumentController ..> DocumentResponse
+DocumentController ..> DocumentService
 
 TaskRequest ..> TaskStatus
 TaskResponse ..> TaskStatus
