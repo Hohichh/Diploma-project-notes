@@ -4,6 +4,10 @@ skinparam shadowing false
 skinparam defaultFontName Arial
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
+skinparam classBackgroundColor transparent
+skinparam classBorderColor black
+skinparam classAttributeBackgroundColor transparent
+skinparam backgroundColor transparent
 left to right direction
 
 interface CalendarService <<Service>>
@@ -64,15 +68,15 @@ interface TaskRepository <<Repository>> {
 interface SubtaskRepository <<Repository>> {
     + findById(id: UUID): Optional<Subtask>
     + findByTaskIdOrderBySortOrder(taskId: UUID): List<Subtask>
-    + findByUserIdAndStatus(userId: UUID, status: SubtaskStatus): List<Subtask>
+    + findByUserIdAndStatus(userId: UUID,\n status: SubtaskStatus): List<Subtask>
     + save(subtask: Subtask): Subtask
     + saveAll(subtasks: List<Subtask>): List<Subtask>
     + deleteById(id: UUID): void
 }
 
 interface TimeslotRepository <<Repository>> {
-    + findByUserIdAndRange(userId: UUID, from: Timestamp, to: Timestamp): List<Timeslot>
-    + findByUserIdAndIsCommitted(userId: UUID, committed: Boolean): List<Timeslot>
+    + findByUserIdAndRange(userId: UUID,\n from: Timestamp, to: Timestamp): List<Timeslot>
+    + findByUserIdAndIsCommitted(userId: UUID,\n  committed: Boolean): List<Timeslot>
     + save(slot: Timeslot): Timeslot
     + saveAll(slots: List<Timeslot>): List<Timeslot>
 }

@@ -4,7 +4,11 @@ skinparam shadowing false
 skinparam defaultFontName Arial
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
-left to right direction
+skinparam classBackgroundColor transparent
+skinparam classBorderColor black
+skinparam classAttributeBackgroundColor transparent
+skinparam backgroundColor transparent
+
 
 interface AgentController <<REST>>
 interface CalendarService <<Service>>
@@ -22,44 +26,44 @@ class ProposedTimeslot <<ValueObject>>
 class AllocationConstraints <<ValueObject>>
 
 interface AgentService <<Service>> {
-    + processRequest(message: String, userId: UUID, taskId: UUID?): DraftResponse
+    + processRequest(message: String,\n userId: UUID,\n taskId: UUID?): DraftResponse
 }
 
 interface DraftService <<Service>> {
-    + createDraftBatch(userId: UUID, drafts: List<SubtaskDraft>): DraftResponse
-    + proposeDraftModification(userId: UUID, subtaskId: UUID, newTimeslot: Timeslot): SubtaskResponse
+    + createDraftBatch(userId: UUID,\n drafts: List<SubtaskDraft>): DraftResponse
+    + proposeDraftModification(userId: UUID,\n subtaskId: UUID, newTimeslot: Timeslot): SubtaskResponse
     + commitDraft(userId: UUID): List<SubtaskResponse>
     + rejectDraft(userId: UUID): void
     + getDraft(userId: UUID): DraftResponse
 }
 
 interface SlotAllocationStrategy <<Strategy>> {
-    + allocate(subtasks: List<Subtask>,\n  occupied: List<Timeslot>,\n  constraints: AllocationConstraints): List<ProposedTimeslot>
+    + allocate(subtasks: List<Subtask>,\n  occupied: List<Timeslot>,\n  constraints: AllocationConstraints):\n List<ProposedTimeslot>
 }
 
 interface VectorStore <<Spring AI>> {
     + add(documents: List<Document>): void
-    + similaritySearch(query: String, topK: Int): List<Document>
+    + similaritySearch(query: String,\n topK: Int): List<Document>
     + delete(ids: List<String>): void
 }
 
 AgentController ..> AgentService
 AgentController ..> DraftService
 
-AgentService ..> CalendarService
-AgentService ..> DraftService
-AgentService ..> SlotAllocationStrategy
-AgentService ..> VectorStore
-AgentService ..> AgentRequest
+AgentService .up.> CalendarService
+AgentService .right.> DraftService
+AgentService .down.> SlotAllocationStrategy
+AgentService .left.> VectorStore 
+AgentService .up.> AgentRequest
 AgentService ..> DraftResponse
 
 DraftService ..> SubtaskRepository
 DraftService ..> TimeslotRepository
-DraftService ..> SubtaskDraft
+DraftService .up.> SubtaskDraft
 DraftService ..> DraftResponse
-DraftService ..> SubtaskResponse
+DraftService .up.> SubtaskResponse
 
-SlotAllocationStrategy ..> Subtask
+SlotAllocationStrategy .left.> Subtask
 SlotAllocationStrategy ..> Timeslot
 SlotAllocationStrategy ..> ProposedTimeslot
 SlotAllocationStrategy ..> AllocationConstraints

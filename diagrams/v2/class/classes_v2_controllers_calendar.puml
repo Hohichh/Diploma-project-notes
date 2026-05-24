@@ -4,6 +4,10 @@ skinparam shadowing false
 skinparam defaultFontName Arial
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
+skinparam classBackgroundColor transparent
+skinparam classBorderColor black
+skinparam classAttributeBackgroundColor transparent
+skinparam backgroundColor transparent
 left to right direction
 
 enum SubtaskStatus {

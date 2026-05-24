@@ -1,0 +1,210 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam classBackgroundColor transparent
+skinparam classBorderColor black
+skinparam classAttributeBackgroundColor transparent
+left to right direction
+
+enum TaskStatus {
+    ACTIVE
+    COMPLETED
+    ARCHIVED
+}
+
+enum SubtaskStatus {
+    DRAFT
+    PENDING_DELETE
+    SCHEDULED
+    COMPLETED
+}
+
+class User <<Entity>> {
+    + id: UUID
+    + name: String
+    + created_at: Timestamp
+}
+
+class AuthMethod <<Entity>> {
+    + id: UUID
+    + user_id: UUID
+    + provider: String
+    + external_id: String
+    + password_hash: String?
+    + created_at: Timestamp
+}
+
+class Task <<Entity>> {
+    + id: UUID
+    + user_id: UUID
+    + title: String
+    + description: String?
+    + deadline: Timestamp
+    + status: TaskStatus
+    + created_at: Timestamp
+}
+
+class Subtask <<Entity>> {
+    + id: UUID
+    + task_id: UUID
+    + user_id: UUID
+    + title: String
+    + estimated_minutes: Int
+    + cognitive_load: String?
+    + sort_order: Int
+    + is_completed: Boolean
+    + status: SubtaskStatus
+    + replaces_id: UUID?
+    + created_at: Timestamp
+}
+
+class Timeslot <<Entity>> {
+    + id: UUID
+    + subtask_id: UUID?
+    + user_id: UUID
+    + start_time: Timestamp
+    + end_time: Timestamp
+    + is_committed: Boolean
+}
+
+class Document <<Spring AI>> {
+    + id: String
+    + content: String
+    + metadata: Map<String, Object>
+    + embedding: float[]
+}
+
+class SubtaskDraft <<ValueObject>>
+class ProposedTimeslot <<ValueObject>>
+class AllocationConstraints <<ValueObject>>
+
+interface UserRepository <<Repository>> {
+    + findById(id: UUID): Optional<User>
+    + save(user: User): User
+    + deleteById(id: UUID): void
+}
+
+interface AuthMethodRepository <<Repository>> {
+    + findById(id: UUID): Optional<AuthMethod>
+    + findByUserId(userId: UUID): List<AuthMethod>
+    + save(method: AuthMethod): AuthMethod
+    + deleteById(id: UUID): void
+}
+
+interface TaskRepository <<Repository>> {
+    + findById(id: UUID): Optional<Task>
+    + findByUserId(userId: UUID): List<Task>
+    + save(task: Task): Task
+    + deleteById(id: UUID): void
+}
+
+interface SubtaskRepository <<Repository>> {
+    + findById(id: UUID): Optional<Subtask>
+    + findByTaskIdOrderBySortOrder(taskId: UUID): List<Subtask>
+    + findByUserIdAndStatus(userId: UUID, status: SubtaskStatus): List<Subtask>
+    + findByUserIdAndStatusIn(userId: UUID, statuses: List<SubtaskStatus>): List<Subtask>
+    + save(subtask: Subtask): Subtask
+    + saveAll(subtasks: List<Subtask>): List<Subtask>
+    + deleteById(id: UUID): void
+    + deleteAllByUserIdAndStatus(userId: UUID, status: SubtaskStatus): void
+}
+
+interface TimeslotRepository <<Repository>> {
+    + findByUserIdAndRange(userId: UUID, from: Timestamp, to: Timestamp): List<Timeslot>
+    + findByUserIdAndIsCommitted(userId: UUID, committed: Boolean): List<Timeslot>
+    + save(slot: Timeslot): Timeslot
+    + saveAll(slots: List<Timeslot>): List<Timeslot>
+    + deleteByUserIdAndIsCommitted(userId: UUID, committed: Boolean): void
+}
+
+interface VectorStore <<Spring AI>> {
+    + add(documents: List<Document>): void
+    + similaritySearch(query: String, topK: Int): List<Document>
+    + delete(ids: List<String>): void
+}
+
+interface UserService <<Service>> {
+    + create(req: UserRequest): UserResponse
+    + getById(id: UUID): UserResponse
+    + update(id: UUID, req: UserRequest): UserResponse
+    + delete(id: UUID): void
+}
+
+interface AuthService <<Service>> {
+    + create(req: AuthMethodRequest): AuthMethodResponse
+    + getById(id: UUID): AuthMethodResponse
+    + getByUserId(userId: UUID): List<AuthMethodResponse>
+    + update(id: UUID, req: AuthMethodRequest): AuthMethodResponse
+    + delete(id: UUID): void
+}
+
+interface CalendarService <<Service>> {
+    + createTask(userId: UUID, req: TaskRequest): TaskResponse
+    + getTasks(userId: UUID): List<TaskResponse>
+    + getTask(id: UUID): TaskResponse
+    + updateTask(id: UUID, req: TaskRequest): TaskResponse
+    + deleteTask(id: UUID): void
+    + createSubtask(userId: UUID, req: SubtaskCreateRequest): SubtaskResponse
+    + getSubtask(id: UUID): SubtaskResponse
+    + getSubtasksByTask(taskId: UUID): List<SubtaskResponse>
+    + updateSubtask(id: UUID, req: SubtaskUpdateRequest): SubtaskResponse
+    + updateStatus(id: UUID, status: SubtaskStatus): SubtaskResponse
+    + deleteSubtask(id: UUID): void
+    + getOccupiedSlots(userId: UUID, from: Timestamp, to: Timestamp): List<TimeslotResponse>
+}
+
+interface AgentService <<Service>> {
+    + processRequest(message: String, userId: UUID, taskId: UUID?): DraftResponse
+}
+
+interface DraftService <<Service>> {
+    + createDraftBatch(userId: UUID, drafts: List<SubtaskDraft>): DraftResponse
+    + proposeDraftModification(userId: UUID, subtaskId: UUID, newTimeslot: Timeslot): SubtaskResponse
+    + commitDraft(userId: UUID): List<SubtaskResponse>
+    + rejectDraft(userId: UUID): void
+    + getDraft(userId: UUID): DraftResponse
+}
+
+interface SlotAllocationStrategy <<Strategy>> {
+    + allocate(subtasks: List<Subtask>,\n  occupied: List<Timeslot>,\n  constraints: AllocationConstraints): List<ProposedTimeslot>
+}
+
+UserService ..> UserRepository
+
+AuthService ..> AuthMethodRepository
+
+CalendarService ..> TaskRepository
+CalendarService ..> SubtaskRepository
+CalendarService ..> TimeslotRepository
+CalendarService ..> VectorStore
+CalendarService ..> SubtaskStatus
+
+AgentService ..> CalendarService
+AgentService ..> DraftService
+AgentService ..> SlotAllocationStrategy
+AgentService ..> VectorStore
+
+DraftService ..> SubtaskRepository
+DraftService ..> TimeslotRepository
+DraftService ..> SubtaskDraft
+DraftService ..> Timeslot
+
+SlotAllocationStrategy ..> Subtask
+SlotAllocationStrategy ..> Timeslot
+SlotAllocationStrategy ..> ProposedTimeslot
+SlotAllocationStrategy ..> AllocationConstraints
+
+UserRepository --> User
+AuthMethodRepository --> AuthMethod
+TaskRepository --> Task
+SubtaskRepository --> Subtask
+TimeslotRepository --> Timeslot
+VectorStore --> Document
+
+Task ..> TaskStatus
+Subtask ..> SubtaskStatus
+
+@enduml

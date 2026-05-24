@@ -1,0 +1,195 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam classAttributeIconSize 0
+skinparam classBackgroundColor transparent
+skinparam classBorderColor black
+skinparam classAttributeBackgroundColor transparent
+skinparam linetype ortho
+ 
+
+enum SubtaskStatus {
+    DRAFT
+    PENDING_DELETE
+    SCHEDULED
+    COMPLETED
+}
+
+enum TaskStatus {
+    ACTIVE
+    COMPLETED
+    ARCHIVED
+}
+
+class UserRequest <<DTO>> {
+    + name: String
+}
+
+class UserResponse <<DTO>> {
+    + id: UUID
+    + name: String
+    + created_at: Timestamp
+}
+
+class AuthMethodRequest <<DTO>> {
+    + user_id: UUID
+    + provider: String
+    + external_id: String
+    + password_hash: String?
+}
+
+class AuthMethodResponse <<DTO>> {
+    + id: UUID
+    + user_id: UUID
+    + provider: String
+    + external_id: String
+    + created_at: Timestamp
+}
+
+class TaskRequest <<DTO>> {
+    + title: String
+    + description: String?
+    + deadline: Timestamp
+    + status: String
+}
+
+class TaskResponse <<DTO>> {
+    + id: UUID
+    + user_id: UUID
+    + title: String
+    + description: String?
+    + deadline: Timestamp
+    + status: String
+    + created_at: Timestamp
+}
+
+class SubtaskCreateRequest <<DTO>> {
+    + task_id: UUID
+    + title: String
+    + estimated_minutes: Int
+    + cognitive_load: String?
+    + sort_order: Int?
+    + start_time: Timestamp?
+    + end_time: Timestamp?
+}
+
+class SubtaskUpdateRequest <<DTO>> {
+    + title: String
+    + estimated_minutes: Int
+    + cognitive_load: String?
+    + sort_order: Int?
+}
+
+class TimeslotResponse <<DTO>> {
+    + id: UUID
+    + subtask_id: UUID?
+    + user_id: UUID
+    + start_time: Timestamp
+    + end_time: Timestamp
+    + is_committed: Boolean
+}
+
+class SubtaskResponse <<DTO>> {
+    + id: UUID
+    + task_id: UUID
+    + user_id: UUID
+    + title: String
+    + estimated_minutes: Int
+    + cognitive_load: String?
+    + sort_order: Int
+    + is_completed: Boolean
+    + status: String
+    + replaces_id: UUID?
+    + created_at: Timestamp
+    + timeslot: TimeslotResponse?
+}
+
+class StatusPatch <<DTO>> {
+    + status: String
+}
+
+class AgentRequest <<DTO>> {
+    + message: String
+    + task_id: UUID?
+}
+
+class DraftResponse <<DTO>> {
+    + subtasks: List<SubtaskResponse>
+    + has_modifications: Boolean
+}
+
+interface UserService <<Service>>
+interface AuthService <<Service>>
+interface CalendarService <<Service>>
+interface AgentService <<Service>>
+interface DraftService <<Service>>
+
+interface UserController <<REST>> {
+    + createUser(req: UserRequest): UserResponse
+    + getUser(id: UUID): UserResponse
+    + updateUser(id: UUID, req: UserRequest): UserResponse
+    + deleteUser(id: UUID): void
+}
+
+interface AuthController <<REST>> {
+    + createAuthMethod(req: AuthMethodRequest): AuthMethodResponse
+    + getAuthMethod(id: UUID): AuthMethodResponse
+    + getByUserId(userId: UUID): List<AuthMethodResponse>
+    + updateAuthMethod(id: UUID, req: AuthMethodRequest): AuthMethodResponse
+    + deleteAuthMethod(id: UUID): void
+}
+
+interface CalendarController <<REST>> {
+    + createTask(req: TaskRequest): TaskResponse
+    + getTasks(): List<TaskResponse>
+    + getTask(id: UUID): TaskResponse
+    + updateTask(id: UUID, req: TaskRequest): TaskResponse
+    + deleteTask(id: UUID): void
+    + createSubtask(req: SubtaskCreateRequest): SubtaskResponse
+    + getSubtask(id: UUID): SubtaskResponse
+    + getSubtasksByTask(taskId: UUID): List<SubtaskResponse>
+    + updateSubtask(id: UUID, req: SubtaskUpdateRequest): SubtaskResponse
+    + patchStatus(id: UUID, patch: StatusPatch): SubtaskResponse
+    + deleteSubtask(id: UUID): void
+    + getTimeslots(from: Timestamp, to: Timestamp): List<TimeslotResponse>
+}
+
+interface AgentController <<REST>> {
+    + generate(req: AgentRequest): DraftResponse
+    + commitDraft(): List<SubtaskResponse>
+    + rejectDraft(): void
+    + getDraft(): DraftResponse
+}
+
+UserController ..> UserRequest
+UserController ..> UserResponse
+UserController ..> UserService
+
+AuthController ..> AuthMethodRequest
+AuthController ..> AuthMethodResponse
+AuthController ..> AuthService
+
+CalendarController ..> TaskRequest
+CalendarController ..> TaskResponse
+CalendarController ..> SubtaskCreateRequest
+CalendarController ..> SubtaskUpdateRequest
+CalendarController ..> SubtaskResponse
+CalendarController ..> StatusPatch
+CalendarController ..> TimeslotResponse
+CalendarController ..> CalendarService
+
+AgentController ..> AgentRequest
+AgentController ..> DraftResponse
+AgentController ..> SubtaskResponse
+AgentController ..> AgentService
+AgentController ..> DraftService
+
+TaskRequest ..> TaskStatus
+TaskResponse ..> TaskStatus
+SubtaskResponse ..> SubtaskStatus
+StatusPatch ..> SubtaskStatus
+SubtaskResponse ..> TimeslotResponse
+DraftResponse ..> SubtaskResponse
+
+@enduml

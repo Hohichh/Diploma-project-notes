@@ -4,6 +4,10 @@ skinparam shadowing false
 skinparam defaultFontName Arial
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
+skinparam classBackgroundColor transparent
+skinparam classBorderColor black
+skinparam classAttributeBackgroundColor transparent
+skinparam backgroundColor transparent
 left to right direction
 
 interface AgentService <<Service>>
@@ -47,21 +51,21 @@ class Document <<Spring AI>> {
 }
 
 interface SubtaskRepository <<Repository>> {
-    + findByUserIdAndStatus(userId: UUID, status: SubtaskStatus): List<Subtask>
-    + findByUserIdAndStatusIn(userId: UUID, statuses: List<SubtaskStatus>): List<Subtask>
+    + findByUserIdAndStatus(userId: UUID,\n status: SubtaskStatus): List<Subtask>
+    + findByUserIdAndStatusIn(userId: UUID,\n statuses: List<SubtaskStatus>): List<Subtask>
     + saveAll(subtasks: List<Subtask>): List<Subtask>
-    + deleteAllByUserIdAndStatus(userId: UUID, status: SubtaskStatus): void
+    + deleteAllByUserIdAndStatus(userId: UUID,\n  status: SubtaskStatus): void
 }
 
 interface TimeslotRepository <<Repository>> {
-    + findByUserIdAndIsCommitted(userId: UUID, committed: Boolean): List<Timeslot>
+    + findByUserIdAndIsCommitted(userId: UUID,\n committed: Boolean): List<Timeslot>
     + saveAll(slots: List<Timeslot>): List<Timeslot>
-    + deleteByUserIdAndIsCommitted(userId: UUID, committed: Boolean): void
+    + deleteByUserIdAndIsCommitted(userId: UUID,\n committed: Boolean): void
 }
 
 interface VectorStore <<Spring AI>> {
     + add(documents: List<Document>): void
-    + similaritySearch(query: String, topK: Int): List<Document>
+    + similaritySearch(query: String,\n topK: Int): List<Document>
     + delete(ids: List<String>): void
 }
 

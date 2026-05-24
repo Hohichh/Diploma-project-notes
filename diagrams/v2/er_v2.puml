@@ -1,8 +1,13 @@
 @startuml
+skinparam classBackgroundColor transparent
+skinparam classBorderColor black
+skinparam classAttributeBackgroundColor transparent
+skinparam backgroundColor transparent
 skinparam monochrome true
 skinparam shadowing false
 skinparam defaultFontName Arial
 skinparam linetype ortho
+
 left to right direction
 
 entity "users" as users {

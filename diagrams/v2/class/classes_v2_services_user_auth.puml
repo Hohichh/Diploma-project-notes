@@ -4,6 +4,10 @@ skinparam shadowing false
 skinparam defaultFontName Arial
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
+skinparam classBackgroundColor transparent
+skinparam classBorderColor black
+skinparam classAttributeBackgroundColor transparent
+skinparam backgroundColor transparent
 left to right direction
 
 interface UserController <<REST>>
@@ -28,7 +32,7 @@ interface AuthService <<Service>> {
     + create(req: AuthMethodRequest): AuthMethodResponse
     + getById(id: UUID): AuthMethodResponse
     + getByUserId(userId: UUID): List<AuthMethodResponse>
-    + update(id: UUID, req: AuthMethodRequest): AuthMethodResponse
+    + update(id: UUID,\n req: AuthMethodRequest): AuthMethodResponse
     + delete(id: UUID): void
 }
 

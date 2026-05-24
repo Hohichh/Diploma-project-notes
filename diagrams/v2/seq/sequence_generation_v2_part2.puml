@@ -3,8 +3,9 @@ skinparam monochrome true
 skinparam shadowing false
 skinparam sequenceMessageAlign center
 skinparam defaultFontName Arial
+skinparam ParticipantBackgroundColor transparent
 
-autonumber "<b>[7]</b>"
+autonumber "<b>[0]</b>"
 
 participant "AgentController" as Ctrl
 participant "AgentService" as Agent
@@ -14,14 +15,14 @@ database "PostgreSQL" as DB
 
 activate Agent
 
-Agent -> Algo : allocate(subtasks, occupiedSlots, constraints)
+Agent -> Algo : allocate(subtasks,\n occupiedSlots, constraints)
 activate Algo
 Algo --> Agent : List<ProposedTimeslot>
 deactivate Algo
 
 Agent -> Draft : createDraftBatch(userId, subtaskDrafts)
 activate Draft
-Draft -> DB : INSERT subtasks (status=draft)\nINSERT timeslots (is_committed=false)
+Draft -> DB : INSERT subtasks\n (status=draft)\nINSERT timeslots\n (is_committed=false)
 DB --> Draft : saved
 Draft --> Agent : DraftResponse
 deactivate Draft

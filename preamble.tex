@@ -29,7 +29,7 @@
 \addto\captionsrussian{
   \renewcommand\contentsname{\centerline{\bfseries\large{\MakeUppercase{содержание}}}}
   \renewcommand{\bibsection}{\sectioncentered*{Cписок использованных источников}}
-  \renewcommand{\listingscaption}{Листинг}
+  \renewcommand{\listingscaption}{Рисунок}
 }
 
 \AtEndDocument{
@@ -128,6 +128,7 @@
     {1em \@plus .2ex}
     {\raggedright\hyphenpenalty=10000\normalfont\normalsize\bfseries}}
 \makeatother
+\newcommand{\numberedparagraph}{\par\refstepcounter{subsubsection}\textbf{\thesubsubsection}\space}
 
 % Зачем: для оформления введения и заключения, они должны быть выровнены по центру.
 \makeatletter
@@ -141,6 +142,7 @@
 \makeatother
 
 \usepackage[final]{graphicx}
+\usepackage{float}
 \DeclareGraphicsExtensions{.png,.jpg}
 
 % Зачем: Добавление подписей к рисункам
@@ -160,14 +162,15 @@
 % \DeclareCaptionLabelFormat{stblisting}{Листинг \emph{#2}}
 \DeclareCaptionLabelFormat{stbfigure}{Рисунок #2}
 \DeclareCaptionLabelFormat{stbtable}{Таблица #2}
-\DeclareCaptionLabelFormat{stblisting}{Листинг #2}
+\DeclareCaptionLabelFormat{stblisting}{Рисунок #2}
 \DeclareCaptionLabelSeparator{stb}{~--~}
 \captionsetup{labelsep=stb}
 \captionsetup[figure]{labelformat=stbfigure, justification=centering, font={small}}
 \captionsetup[listing]{labelformat=stblisting,justification=centering, font={small}}
+\captionsetup[lstlisting]{labelformat=stblisting,justification=centering, font={small}}
 % сказали что надо слева
 % \captionsetup[table]{labelformat=stbtable, justification=centering, font={small}}
-\captionsetup[table]{labelformat=stbtable, justification=raggedright,singlelinecheck=false, font={small}}
+\captionsetup[table]{labelformat=stbtable, justification=raggedright,singlelinecheck=false, font={small}, skip=0pt}
 \renewcommand{\thesubfigure}{\asbuk{subfigure}}
 
 % Зачем: Окружения для оформления формул
@@ -232,6 +235,7 @@
 
 % Зачем: Включение номера раздела в номер листинга. Нумерация листингов внутри раздела.
 \AtBeginDocument{\numberwithin{listing}{section}}
+\AtBeginDocument{\numberwithin{lstlisting}{section}}
 
 
 \usepackage{makecell}
@@ -261,6 +265,7 @@
 \lstset{
   breaklines=true,
   breakatwhitespace=false,
+  captionpos=b,
   columns=fullflexible,
   keepspaces=true,
   showstringspaces=false,

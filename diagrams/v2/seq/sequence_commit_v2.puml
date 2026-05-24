@@ -3,6 +3,7 @@ skinparam monochrome true
 skinparam shadowing false
 skinparam sequenceMessageAlign center
 skinparam defaultFontName Arial
+skinparam ParticipantBackgroundColor transparent
 
 autonumber "<b>[0]</b>"
 
@@ -14,9 +15,9 @@ database "PostgreSQL" as DB
 
 == Подтверждение черновика ==
 
-User -> UI : Нажимает "Подтвердить"
+User -> UI : Нажимает\n "Подтвердить"
 activate UI
-UI -> Ctrl : POST /agent/draft/commit
+UI -> Ctrl : POST\n /agent/draft/commit
 activate Ctrl
 Ctrl -> Draft : commitDraft(userId)
 activate Draft
@@ -31,14 +32,14 @@ deactivate Draft
 
 Ctrl --> UI : 200 OK {subtasks[]}
 deactivate Ctrl
-UI --> User : Обновление календаря
+UI --> User : Обновление\n календаря
 deactivate UI
 
 == Отклонение черновика (альтернатива) ==
 
-User -> UI : Нажимает "Отклонить"
+User -> UI : Нажимает\n "Отклонить"
 activate UI
-UI -> Ctrl : POST /agent/draft/reject
+UI -> Ctrl : POST\n /agent/draft/reject
 activate Ctrl
 Ctrl -> Draft : rejectDraft(userId)
 activate Draft
@@ -53,7 +54,7 @@ deactivate Draft
 
 Ctrl --> UI : 204 No Content
 deactivate Ctrl
-UI --> User : Возврат к текущему расписанию
+UI --> User : Возврат к\n текущему расписанию
 deactivate UI
 
 @enduml
